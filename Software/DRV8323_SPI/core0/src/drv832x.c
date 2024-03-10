@@ -74,9 +74,9 @@ void drv832x_init_spi()
     timing_config.master_config.csht = spi_csht_half_sclk_12;
     timing_config.master_config.sclk_freq_in_hz = BOARD_DRV8323_SPI_SCLK_FREQ; // 10M
     spi_master_timing_init(BOARD_DRV8323_SPI_BASE, &timing_config);
-    DRV_DBG("DRV8323 SPI timing is configured.\n");
-    DRV_DBG("DRV8323 SPI source clock frequency: %dHz\n", timing_config.master_config.clk_src_freq_in_hz);
-    DRV_DBG("DRV8323 SPI sclk frequency: %dHz\n", timing_config.master_config.sclk_freq_in_hz);
+    DRV_DBG("DRV832x SPI timing is configured.\n");
+    DRV_DBG("DRV832x SPI source clock frequency: %dHz\n", timing_config.master_config.clk_src_freq_in_hz);
+    DRV_DBG("DRV832x SPI sclk frequency: %dHz\n", timing_config.master_config.sclk_freq_in_hz);
 
     /* set SPI format config for master */
     spi_master_get_default_format_config(&format_config);
@@ -86,7 +86,7 @@ void drv832x_init_spi()
     format_config.common_config.cpha = spi_sclk_sampling_even_clk_edges;
     format_config.common_config.lsb = false;
     spi_format_init(BOARD_DRV8323_SPI_BASE, &format_config);
-    DRV_DBG("DRV8323 SPI format is configured.\n");
+    DRV_DBG("DRV832x SPI format is configured.\n");
 
     /* set SPI control config for master */
     spi_master_get_default_control_config(&control_config);
@@ -129,7 +129,7 @@ void drv832x_dump_regs()
 {
     uint16_t data;
     hpm_stat_t stat;
-    DRV_DBG("dump DRV8323 Regs:\n");
+    DRV_DBG("dump DRV832x Regs:\n");
 
 #define XX(ADDR)                                                                                                       \
     if ((stat = drv832x_read_reg(ADDR, &data)) == status_success)                                                      \
