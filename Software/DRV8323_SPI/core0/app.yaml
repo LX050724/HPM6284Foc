@@ -1,0 +1,7 @@
+dependency:
+  - multicore
+
+linked_project:
+  project_name: multicore/hello/core1
+  build_type: sec_core_img
+
