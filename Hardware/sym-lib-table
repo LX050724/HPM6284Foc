@@ -1,0 +1,9 @@
+(sym_lib_table
+  (version 7)
+  (lib (name "HPM64-6700_Library")(type "KiCad")(uri "${KIPRJMOD}/lib/HPM_LIB_20231231/HPM_symbols/HPM64-6700_Library.kicad_sym")(options "")(descr ""))
+  (lib (name "HPM5300_Library")(type "KiCad")(uri "${KIPRJMOD}/lib/HPM_LIB_20231231/HPM_symbols/HPM5300_Library.kicad_sym")(options "")(descr ""))
+  (lib (name "HPM6200_Library")(type "KiCad")(uri "${KIPRJMOD}/lib/HPM_LIB_20231231/HPM_symbols/HPM6200_Library.kicad_sym")(options "")(descr ""))
+  (lib (name "HPM6300_Library")(type "KiCad")(uri "${KIPRJMOD}/lib/HPM_LIB_20231231/HPM_symbols/HPM6300_Library.kicad_sym")(options "")(descr ""))
+  (lib (name "HPM6800_Library")(type "KiCad")(uri "${KIPRJMOD}/lib/HPM_LIB_20231231/HPM_symbols/HPM6800_Library.kicad_sym")(options "")(descr ""))
+  (lib (name "HPM6280Foc")(type "KiCad")(uri "${KIPRJMOD}/lib/HPM6280Foc.kicad_sym")(options "")(descr ""))
+)
