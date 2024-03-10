@@ -1,0 +1,395 @@
+{
+  "socName": "HPM6280",
+  "packageName": "BGA116",
+  "functions": {
+    "init_pins": {
+      "groupOptions": {
+        "SPI.SPI1": "D",
+        "CAN.CAN1": "B",
+        "I2C.I2C2": "A",
+        "UART.UART1": "CD",
+        "I2C.I2C3": "A",
+        "SPI.SPI3": "B"
+      },
+      "selectPins": {
+        "PA00": {
+          "signal": "XPI.XPI0.CA_CS0",
+          "padCtls": {}
+        },
+        "PA03": {
+          "signal": "XPI.XPI0.CA_D[0]",
+          "padCtls": {}
+        },
+        "PA01": {
+          "signal": "XPI.XPI0.CA_D[1]",
+          "padCtls": {}
+        },
+        "PA02": {
+          "signal": "XPI.XPI0.CA_D[2]",
+          "padCtls": {}
+        },
+        "PA05": {
+          "signal": "XPI.XPI0.CA_D[3]",
+          "padCtls": {}
+        },
+        "PA04": {
+          "signal": "XPI.XPI0.CA_SCLK",
+          "padCtls": {}
+        },
+        "PZ01": {
+          "signal": "NEXTIOC.BATT.BATT.RESETN",
+          "padCtls": {}
+        },
+        "PY02": {
+          "signal": "NEXTIOC.PMIC.JTAG.TCK",
+          "padCtls": {}
+        },
+        "PY01": {
+          "signal": "NEXTIOC.PMIC.JTAG.TDI",
+          "padCtls": {}
+        },
+        "PY00": {
+          "signal": "NEXTIOC.PMIC.JTAG.TDO",
+          "padCtls": {}
+        },
+        "PY03": {
+          "signal": "NEXTIOC.PMIC.JTAG.TMS",
+          "padCtls": {}
+        },
+        "PY04": {
+          "signal": "NEXTIOC.PMIC.JTAG.TRST",
+          "padCtls": {}
+        },
+        "PY07": {
+          "signal": "NEXTIOC.PMIC.UART.RXD",
+          "padCtls": {}
+        },
+        "PY06": {
+          "signal": "NEXTIOC.PMIC.UART.TXD",
+          "padCtls": {}
+        },
+        "PA21": {
+          "signal": "GPIO.GPIO.A[21]",
+          "padCtls": {},
+          "gpiom": {
+            "direction": "1",
+            "interrupt": "0",
+            "select": "1",
+            "hide": [
+              "2"
+            ],
+            "lock": "1"
+          }
+        },
+        "PA20": {
+          "signal": "GPIO.GPIO.A[20]",
+          "padCtls": {},
+          "gpiom": {
+            "direction": "1",
+            "interrupt": "0",
+            "select": "1",
+            "hide": [
+              "2"
+            ],
+            "lock": "1"
+          }
+        },
+        "PA28": {
+          "signal": "SPI.SPI0.CSN",
+          "padCtls": {}
+        },
+        "PA29": {
+          "signal": "SPI.SPI0.MISO",
+          "padCtls": {}
+        },
+        "PA31": {
+          "signal": "SPI.SPI0.MOSI",
+          "padCtls": {}
+        },
+        "PA30": {
+          "signal": "SPI.SPI0.SCLK",
+          "padCtls": {
+            "LOOP_BACK": {
+              "key": "1",
+              "index": "v0"
+            }
+          }
+        },
+        "PA27": {
+          "signal": "TRGM.TRGM1.P[07]",
+          "padCtls": {}
+        },
+        "PB12": {
+          "signal": "PWM.PWM0.P[0]",
+          "padCtls": {}
+        },
+        "PB13": {
+          "signal": "PWM.PWM0.P[1]",
+          "padCtls": {}
+        },
+        "PB14": {
+          "signal": "PWM.PWM0.P[2]",
+          "padCtls": {}
+        },
+        "PB15": {
+          "signal": "PWM.PWM0.P[3]",
+          "padCtls": {}
+        },
+        "PB16": {
+          "signal": "PWM.PWM0.P[4]",
+          "padCtls": {}
+        },
+        "PB17": {
+          "signal": "PWM.PWM0.P[5]",
+          "padCtls": {}
+        },
+        "PB23": {
+          "signal": "TRGM.TRGM0.P[03]",
+          "padCtls": {},
+          "trgm": {
+            "trgmType": "0",
+            "key": "TRGM0_P3.HALL0_V",
+            "direction": 0
+          }
+        },
+        "PB22": {
+          "signal": "TRGM.TRGM0.P[02]",
+          "padCtls": {},
+          "trgm": {
+            "trgmType": "0",
+            "key": "TRGM0_P2.HALL0_U",
+            "direction": 0
+          }
+        },
+        "PB24": {
+          "signal": "TRGM.TRGM0.P[04]",
+          "padCtls": {},
+          "trgm": {
+            "trgmType": "0",
+            "key": "TRGM0_P4.HALL0_W",
+            "direction": 0
+          }
+        },
+        "PB26": {
+          "signal": "TRGM.TRGM0.P[06]",
+          "padCtls": {},
+          "trgm": {
+            "trgmType": "0",
+            "key": "TRGM0_P6.PWM0_FAULTI1",
+            "direction": 0
+          }
+        },
+        "PB01": {
+          "signal": "UART.UART1.RXD",
+          "padCtls": {}
+        },
+        "PB00": {
+          "signal": "UART.UART1.TXD",
+          "padCtls": {}
+        },
+        "PB31": {
+          "signal": "TRGM.TRGM0.P[11]",
+          "padCtls": {},
+          "trgm": {
+            "trgmType": "0",
+            "key": "PWM0_CH8REF.TRGM0_P11",
+            "direction": 1
+          }
+        },
+        "PC08": {
+          "signal": "ANALOGS.ADC0.INA4",
+          "padCtls": {}
+        },
+        "PC09": {
+          "signal": "ANALOGS.ADC0.INA5",
+          "padCtls": {}
+        },
+        "PC10": {
+          "signal": "ANALOGS.ADC1.INA2",
+          "padCtls": {}
+        },
+        "PC11": {
+          "signal": "ANALOGS.ADC1.INA3",
+          "padCtls": {}
+        },
+        "PC13": {
+          "signal": "ANALOGS.ADC2.INA1",
+          "padCtls": {}
+        },
+        "PC14": {
+          "signal": "ANALOGS.ADC1.INA6",
+          "padCtls": {}
+        },
+        "PC15": {
+          "signal": "ANALOGS.ADC2.INA3",
+          "padCtls": {}
+        },
+        "PC16": {
+          "signal": "ANALOGS.ADC0.INA12",
+          "padCtls": {}
+        },
+        "PC12": {
+          "signal": "ANALOGS.ADC0.INA8",
+          "padCtls": {}
+        },
+        "PC18": {
+          "signal": "SPI.SPI3.CSN",
+          "padCtls": {}
+        },
+        "PC19": {
+          "signal": "SPI.SPI3.MISO",
+          "padCtls": {}
+        },
+        "PC21": {
+          "signal": "SPI.SPI3.MOSI",
+          "padCtls": {}
+        },
+        "PC20": {
+          "signal": "SPI.SPI3.SCLK",
+          "padCtls": {
+            "LOOP_BACK": {
+              "key": "1",
+              "index": "v0"
+            }
+          }
+        },
+        "PA18": {
+          "signal": "CAN.CAN1.RXD",
+          "padCtls": {}
+        },
+        "PA16": {
+          "signal": "CAN.CAN1.STBY",
+          "padCtls": {}
+        },
+        "PA17": {
+          "signal": "CAN.CAN1.TXD",
+          "padCtls": {}
+        },
+        "PB21": {
+          "signal": "CAN.CAN0.RXD",
+          "padCtls": {}
+        },
+        "PB19": {
+          "signal": "CAN.CAN0.STBY",
+          "padCtls": {}
+        },
+        "PB20": {
+          "signal": "CAN.CAN0.TXD",
+          "padCtls": {}
+        },
+        "PA26": {
+          "signal": "I2C.I2C1.SDA",
+          "padCtls": {}
+        },
+        "PA25": {
+          "signal": "I2C.I2C1.SCL",
+          "padCtls": {
+            "LOOP_BACK": {
+              "key": "1",
+              "index": "v0"
+            }
+          }
+        },
+        "PB11": {
+          "signal": "GPIO.GPIO.B[11]",
+          "padCtls": {},
+          "gpiom": {
+            "direction": "0",
+            "outputLevel": "1",
+            "select": "2",
+            "hide": [
+              "1"
+            ],
+            "lock": "1"
+          }
+        },
+        "PZ00": {
+          "signal": "GPIO.GPIO.Z[00]",
+          "nextIOC": {
+            "signal": "BATT.SOC.GPIO_Z[00]"
+          },
+          "padCtls": {},
+          "gpiom": {
+            "direction": "0",
+            "outputLevel": "1",
+            "source": "IOC",
+            "select": "1",
+            "hide": [
+              "2"
+            ],
+            "lock": "1"
+          }
+        },
+        "PZ02": {
+          "signal": "GPIO.GPIO.Z[02]",
+          "nextIOC": {
+            "signal": "BATT.SOC.GPIO_Z[02]"
+          },
+          "padCtls": {},
+          "gpiom": {
+            "direction": "0",
+            "outputLevel": "1",
+            "source": "IOC",
+            "select": "1",
+            "hide": [
+              "2"
+            ],
+            "lock": "1"
+          }
+        }
+      },
+      "unlockedSignals": {},
+      "pinConfig": {
+        "trgm": {
+          "0": {
+            "io": {
+              "TRGM0_P2.HALL0_U": {
+                "input": "TRGM0_P2",
+                "output": "HALL0_U",
+                "outputType": "0",
+                "invert": "0",
+                "inputPin": "PB22"
+              },
+              "TRGM0_P3.HALL0_V": {
+                "input": "TRGM0_P3",
+                "output": "HALL0_V",
+                "outputType": "0",
+                "invert": "0",
+                "inputPin": "PB23"
+              },
+              "TRGM0_P4.HALL0_W": {
+                "input": "TRGM0_P4",
+                "output": "HALL0_W",
+                "outputType": "0",
+                "invert": "0",
+                "inputPin": "PB24"
+              },
+              "TRGM0_P6.PWM0_FAULTI1": {
+                "input": "TRGM0_P6",
+                "output": "PWM0_FAULTI1",
+                "outputType": "0",
+                "invert": "0",
+                "inputPin": "PB26"
+              },
+              "PWM0_CH8REF.TRGM0_P11": {
+                "input": "PWM0_CH8REF",
+                "output": "TRGM0_P11",
+                "outputType": "0",
+                "invert": "0",
+                "outputPin": "PB31"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "selectFunctionName": "init_pins",
+  "userLabels": {
+    "PB11": "LED",
+    "PB26": "DRV_nFAULT",
+    "PA27": "BTN",
+    "PZ00": "PWM_EN",
+    "PZ02": "CAL"
+  }
+}

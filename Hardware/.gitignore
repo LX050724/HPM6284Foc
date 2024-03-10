@@ -30,3 +30,4 @@ fp-info-cache
 /out
 /bom
 *.pos
+*.lck
