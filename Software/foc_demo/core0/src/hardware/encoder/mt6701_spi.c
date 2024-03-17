@@ -29,7 +29,7 @@ void mt6701_spi_init()
     timing_config.master_config.clk_src_freq_in_hz = spi_clcok;
     timing_config.master_config.cs2sclk = spi_cs2sclk_half_sclk_3;
     timing_config.master_config.csht = spi_csht_half_sclk_1;
-    timing_config.master_config.sclk_freq_in_hz = 10000000UL; // 10M
+    timing_config.master_config.sclk_freq_in_hz = 12000000UL; // 10M
     spi_master_timing_init(HPM_SPI0, &timing_config);
 
     spi_master_get_default_format_config(&format_config);

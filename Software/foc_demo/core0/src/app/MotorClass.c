@@ -1,7 +1,7 @@
 #include "app/MotorClass.h"
 #include "project_config.h"
 
-void Motor_RunFoc(MotorClass_t *motor)
+ATTR_RAMFUNC void Motor_RunFoc(MotorClass_t *motor)
 {
     foc_alpha_beta_current_t alpha_beta_current;
     foc_sin_cos_t sin_cos;

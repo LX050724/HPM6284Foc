@@ -5,17 +5,17 @@
 #define SQRT3 1.732050807568877f
 #define SQRT3_BY_2 (SQRT3 / 2.0f)
 
-static inline int32_t foc_max(int32_t a, int32_t b)
+static ATTR_ALWAYS_INLINE int32_t foc_max(int32_t a, int32_t b)
 {
     return a > b ? a : b;
 }
 
-static inline int32_t foc_min(int32_t a, int32_t b)
+static ATTR_ALWAYS_INLINE int32_t foc_min(int32_t a, int32_t b)
 {
     return a < b ? a : b;
 }
 
-void foc_svpwm(const foc_alpha_beta_volt_t *volt, foc_pwm_t *pwm)
+void ATTR_RAMFUNC foc_svpwm(const foc_alpha_beta_volt_t *volt, foc_pwm_t *pwm)
 {
     int32_t pwm_half = PWM_RELOAD / 2;
     int32_t va = (volt->v_alpha) * pwm_half;
@@ -30,19 +30,19 @@ void foc_svpwm(const foc_alpha_beta_volt_t *volt, foc_pwm_t *pwm)
     pwm->pwm_w = vcom - vc;
 }
 
-void foc_park(const foc_alpha_beta_current_t *in, const foc_sin_cos_t *ang, foc_qd_current_t *out)
+void ATTR_RAMFUNC foc_park(const foc_alpha_beta_current_t *in, const foc_sin_cos_t *ang, foc_qd_current_t *out)
 {
     out->id = ang->cosx * in->i_alpha + ang->sinx * in->i_beat;
     out->iq = -ang->sinx * in->i_alpha + ang->cosx * in->i_beat;
 }
 
-void foc_inv_park(const foc_qd_current_t *in, const foc_sin_cos_t *ang, foc_alpha_beta_volt_t *out)
+void ATTR_RAMFUNC foc_inv_park(const foc_qd_current_t *in, const foc_sin_cos_t *ang, foc_alpha_beta_volt_t *out)
 {
     out->v_alpha = ang->cosx * in->id - ang->sinx * in->iq;
     out->v_beta = ang->sinx * in->id + ang->cosx * in->iq;
 }
 
-void foc_clarke(const foc_uvw_current_t *in, foc_alpha_beta_current_t *out)
+void ATTR_RAMFUNC foc_clarke(const foc_uvw_current_t *in, foc_alpha_beta_current_t *out)
 {
     out->i_alpha = in->iu;
     out->i_beat = 1 / SQRT3 * in->iu + 2 / SQRT3 * in->iv;

@@ -2,6 +2,8 @@
 
 #include <stdint.h>
 #include "fast_sin.h"
+#include "hpm_common.h"
+#include <project_config.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -51,7 +53,7 @@ typedef struct
  * @param x 输入弧度
  * @param ang 输出正弦余弦值
  */
-static inline void foc_sin_cos(float x, foc_sin_cos_t *ang)
+static ATTR_ALWAYS_INLINE void foc_sin_cos(float x, foc_sin_cos_t *ang)
 {
     fast_sin_cos(x, &ang->sinx, &ang->cosx);
 }

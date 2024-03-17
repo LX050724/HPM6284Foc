@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include "hpm_common.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -16,7 +17,7 @@ extern "C" {
 // lolremez --float --degree 5 --range "1e-50:pi*pi"
 // "(sin(sqrt(x))-sqrt(x))/(x*sqrt(x))" "1/(x*sqrt(x))"
 // Estimated max error: 1.455468e-9
-static inline float f1(float x)
+static inline ATTR_RAMFUNC float f1(float x)
 {
     float u = 1.3528548e-10f;
     u = u * x + -2.4703144e-08f;
@@ -29,7 +30,7 @@ static inline float f1(float x)
 // lolremez --float --degree 5 --range "1e-50:pi*pi" "(cos(sqrt(x))-1)/x"
 // "1/x"
 // Estimated max error: 1.1846383e-8
-static inline float f2(float x)
+static inline ATTR_RAMFUNC float f2(float x)
 {
     float u = 1.7290616e-09f;
     u = u * x + -2.7093486e-07f;
@@ -39,7 +40,7 @@ static inline float f2(float x)
     return u * x + -0.49999991f;
 }
 
-static inline float fast_sin(float x)
+static inline ATTR_RAMFUNC float fast_sin(float x)
 {
     // si = (int)(x / pi)
     int si = (int)(x * 0.31830988f);
@@ -51,7 +52,7 @@ static inline float fast_sin(float x)
     return x + x * x * x * f1(x * x);
 }
 
-static inline float fast_cos(float x)
+static inline ATTR_RAMFUNC float fast_cos(float x)
 {
     // si = (int)(x / pi)
     int si = (int)(x * 0.31830988f);
@@ -63,7 +64,7 @@ static inline float fast_cos(float x)
     return 1.0f + x * x * f2(x * x);
 }
 
-static inline void fast_sin_cos(float x, float *sin_x, float *cos_x)
+static inline ATTR_RAMFUNC void fast_sin_cos(float x, float *sin_x, float *cos_x)
 {
     // si = (int)(x / pi)
     int si = (int)(x * 0.31830988f);

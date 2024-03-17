@@ -18,6 +18,7 @@ sdk_ses_compile_options(-O3)
 sdk_ses_opt_debug_connection(J-Link)
 
 sdk_app_inc(src)
+sdk_app_inc(${CMAKE_CURRENT_LIST_DIR}/../public)
 sdk_app_inc($ENV{HPM_SDK_BASE}/samples/multicore/common)
 
 file(GLOB_RECURSE SRC_FILES src/*.c)

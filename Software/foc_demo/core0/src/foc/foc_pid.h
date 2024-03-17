@@ -1,5 +1,7 @@
 #pragma once
 
+#include <project_config.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -22,7 +24,7 @@ float foc_pid_controller(foc_pid_contrl_t *pid, float cur, float d, float exp);
 float foc_pid_increase_controller(foc_pid_contrl_t *pid, float cur, float exp);
 
 
-static inline float foc_pid_limit(float in, float limit)
+static ATTR_ALWAYS_INLINE float foc_pid_limit(float in, float limit)
 {
     if (in > limit)
         return limit;
@@ -31,7 +33,7 @@ static inline float foc_pid_limit(float in, float limit)
     return in;
 }
 
-static inline float foc_pid_limit2(float in, float max, float min)
+static ATTR_ALWAYS_INLINE float foc_pid_limit2(float in, float max, float min)
 {
     if (in > max)
         return max;
@@ -40,7 +42,7 @@ static inline float foc_pid_limit2(float in, float max, float min)
     return in;
 }
 
-static inline int foc_pid_diff(int a, int b, int rand)
+static ATTR_ALWAYS_INLINE int foc_pid_diff(int a, int b, int rand)
 {
     int diff = a - b;
     if (diff > rand / 2)

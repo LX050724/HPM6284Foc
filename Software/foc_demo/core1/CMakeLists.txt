@@ -21,6 +21,7 @@ sdk_ses_opt_debug_connection(J-Link)
 
 sdk_inc(src)
 sdk_inc(src/usb)
+sdk_app_inc(${CMAKE_CURRENT_LIST_DIR}/../public)
 
 file(GLOB_RECURSE SRC_FILES src/*.c)
 sdk_app_src(${SRC_FILES})
