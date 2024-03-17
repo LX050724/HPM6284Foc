@@ -238,7 +238,20 @@
         },
         "PC19": {
           "signal": "SPI.SPI3.MISO",
-          "padCtls": {}
+          "padCtls": {
+            "PE": {
+              "key": "1",
+              "index": "v0"
+            },
+            "PS": {
+              "key": "1",
+              "index": "v2"
+            },
+            "PRS": {
+              "key": "10",
+              "index": "v2"
+            }
+          }
         },
         "PC21": {
           "signal": "SPI.SPI3.MOSI",

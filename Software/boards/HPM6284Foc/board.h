@@ -280,14 +280,30 @@
 
 /*adc*/
 #define BOARD_BLDC_ADC_MODULE                  ADCX_MODULE_ADC16
-#define BOARD_BLDC_ADC_U_BASE                  HPM_ADC0
-#define BOARD_BLDC_ADC_V_BASE                  HPM_ADC1
-#define BOARD_BLDC_ADC_W_BASE                  HPM_ADC2
+#define BOARD_BLDC_ADC_A_BASE                  HPM_ADC0
+#define BOARD_BLDC_ADC_B_BASE                  HPM_ADC2
+#define BOARD_BLDC_ADC_C_BASE                  HPM_ADC1
+#define BOARD_BLDC_VOL_ADC_A_BASE              HPM_ADC1
+#define BOARD_BLDC_VOL_ADC_B_BASE              HPM_ADC0
+#define BOARD_BLDC_VOL_ADC_C_BASE              HPM_ADC2
+#define BOARD_BLDC_VOL_ADC_BUS_BASE            HPM_ADC1
+
 #define BOARD_BLDC_ADC_TRIG_FLAG               adc16_event_trig_complete
 
-#define BOARD_BLDC_ADC_CH_U                    (11U)
-#define BOARD_BLDC_ADC_CH_V                    (9U)
-#define BOARD_BLDC_ADC_CH_W                    (4U)
+#define BOARD_BLDC_ADC_CH_A                    (12U)
+#define BOARD_BLDC_ADC_CH_B                    (3U)
+#define BOARD_BLDC_ADC_CH_C                    (6U)
+#define BOARD_BLDC_VOL_ADC_CH_A                (3U)
+#define BOARD_BLDC_VOL_ADC_CH_B                (8U)
+#define BOARD_BLDC_VOL_ADC_CH_C                (1U)
+#define BOARD_BLDC_VOL_ADC_CH_BUS              (2U)
+#define BOARD_BLDC_ADC_A_SAMPLE_CLCYE          (30U)
+#define BOARD_BLDC_ADC_B_SAMPLE_CLCYE          (30U)
+#define BOARD_BLDC_ADC_C_SAMPLE_CLCYE          (30U)
+#define BOARD_BLDC_VOL_ADC_A_SAMPLE_CLCYE      (30U)
+#define BOARD_BLDC_VOL_ADC_B_SAMPLE_CLCYE      (30U)
+#define BOARD_BLDC_VOL_ADC_C_SAMPLE_CLCYE      (30U)
+#define BOARD_BLDC_VOL_ADC_BUS_SAMPLE_CLCYE    (30U)
 #define BOARD_BLDC_ADC_IRQn                    IRQn_ADC0
 #define BOARD_BLDC_ADC_PMT_DMA_SIZE_IN_4BYTES  (ADC_SOC_PMT_MAX_DMA_BUFF_LEN_IN_4BYTES)
 #define BOARD_BLDC_ADC_TRG                    ADC16_CONFIG_TRG0A
@@ -295,6 +311,13 @@
 #define BOARD_BLDC_PWM_TRIG_CMP_INDEX          (8U)
 #define BOARD_BLDC_TRIGMUX_IN_NUM              HPM_TRGM0_INPUT_SRC_PWM0_CH8REF
 #define BOARD_BLDC_TRG_NUM                     TRGM_TRGOCFG_ADCX_PTRGI0A
+
+#define BOARD_NTC1_ADC_BASE                    HPM_ADC0
+#define BOARD_NTC1_ADC_CH                      (4)
+#define BOARD_NTC1_ADC_SAMPLE_CLCYE            (60U)
+#define BOARD_NTC2_ADC_BASE                    HPM_ADC0
+#define BOARD_NTC2_ADC_CH                      (60U)
+#define BOARD_NTC2_ADC_SAMPLE_CLCYE            (50)
 
 /*PLA*/
 #define BOARD_PLA_COUNTER   HPM_PLA0

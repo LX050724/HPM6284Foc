@@ -10,8 +10,14 @@ set(SEC_CORE_IMG_C_ARRAY_OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/../core0/src/sec_cor
 find_package(hpm-sdk REQUIRED HINTS $ENV{HPM_SDK_BASE})
 
 project(multicore_core1)
-
+sdk_ses_compile_options(-mabi=ilp32f)
+sdk_ses_compile_options(-march=rv32imafc)
+sdk_ses_compile_options(-O3)
 sdk_ses_opt_debug_connection(J-Link)
-sdk_app_src(src/demo.c)
+
+sdk_inc(src)
+
+file(GLOB_RECURSE SRC_FILES src/*.c)
+sdk_app_src(${SRC_FILES})
 
 generate_ses_project()

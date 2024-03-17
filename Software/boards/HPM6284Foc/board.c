@@ -286,7 +286,14 @@ void board_init_i2c(I2C_Type *ptr)
 
 uint32_t board_init_spi_clock(SPI_Type *ptr)
 {
-    if (ptr == HPM_SPI1) {
+    if (ptr == HPM_SPI0)
+    {
+        /* SPI1 clock configure */
+        clock_add_to_group(clock_spi0, 0);
+        clock_set_source_divider(clock_spi0, clk_src_pll0_clk0, 5U); /* 80MHz */
+
+        return clock_get_frequency(clock_spi0);
+    } else if (ptr == HPM_SPI1) {
         /* SPI1 clock configure */
         clock_add_to_group(clock_spi1, 0);
         clock_set_source_divider(clock_spi1, clk_src_pll0_clk0, 5U); /* 80MHz */
