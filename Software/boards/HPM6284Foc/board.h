@@ -316,7 +316,7 @@
 #define BOARD_NTC1_ADC_CH                      (4)
 #define BOARD_NTC1_ADC_SAMPLE_CLCYE            (60U)
 #define BOARD_NTC2_ADC_BASE                    HPM_ADC0
-#define BOARD_NTC2_ADC_CH                      (60U)
+#define BOARD_NTC2_ADC_CH                      (5)
 #define BOARD_NTC2_ADC_SAMPLE_CLCYE            (50)
 
 /*PLA*/

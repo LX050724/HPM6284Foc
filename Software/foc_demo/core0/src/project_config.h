@@ -32,8 +32,8 @@ extern "C" {
 #define ELECTRICAL_ANGLE_CALIBRATION_DELAY 500  // 电角度校准延迟(ms)
 
 /* ADC参数 */
-#define SAMPLING_RESISTOR 0.002f                      // 采样电阻 Ω
-#define CURRENT_AMP 40                                // 电流运放放大倍数 5/10/20/40
+#define SAMPLING_RESISTOR 0.005f                      // 采样电阻 Ω
+#define CURRENT_AMP 20                                // 电流运放放大倍数 5/10/20/40
 #define CURRENT_COE (SAMPLING_RESISTOR * CURRENT_AMP) // 电流系数 V/A
 #define VOLTAGE_AMP 20.0f                             // 母线电压放大倍数
 #define ADC_IGNORE_BIT 0                              // ADC低位舍弃
