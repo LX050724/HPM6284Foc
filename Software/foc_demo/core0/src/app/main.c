@@ -8,7 +8,6 @@
 #include "app/current_calibration/current_calibration.h"
 #include "app/electrical_angle_calibration/electrical_angle_calibration.h"
 #include "board.h"
-#include "foc/fast_sin.h"
 #include "foc/foc_core.h"
 #include "hardware/adc_init.h"
 #include "hardware/drv832x.h"
@@ -18,13 +17,11 @@
 #include "hardware/trgm.h"
 #include "hpm_clock_drv.h"
 #include "hpm_common.h"
+#include "hpm_ioc_regs.h"
 #include "hpm_iomux.h"
-#include "hpm_l1c_drv.h"
 #include "hpm_mbx_drv.h"
 #include "hpm_misc.h"
-#include "hpm_pmp_drv.h"
 #include "hpm_soc.h"
-#include "hpm_spi_drv.h"
 #include "hpm_trgm_drv.h"
 #include "hpm_trgmmux_src.h"
 #include "multicore_common.h"
@@ -43,26 +40,35 @@ volatile core_comm_ctl_t *core_comm_ctl;
 MotorClass_t motor0;
 
 volatile int vofa_write_ptr;
-just_float_data vofa_data[BUF_NUM] ATTR_ALIGN(64);
+DMA_ATTR just_float_data vofa_data[BUF_NUM] ATTR_ALIGN(64);
 
+#if SPEED_FILTER_MODE == SPEED_FILTER_IIR
 /**
- * @brief
- *
- * @param _R1       当前温度下的电阻
- * @param _B        所使用的NTC电阻B值(datasheet里面有,例如3950)
- * @param _R2       T2温度下的电阻
- * @param _T2       一般是25℃
- * @return float    返回的就是当前温度(℃)
+ * @brief IIR滤波器系数，切比雪夫II型@100Khz低通滤波器，通带频率100Hz/200Hz
  */
-float resistanceToTemperature(int ntc_index, float _R1)
-{
-    float _B = 3950;
-    float _R2 = 10e3;
-    float _T2 = 25;
-    return (1.0f / ((1.0f / _B) * log(_R1 / _R2) + (1.0f / (_T2 + 273.15f))) - 273.15f);
-}
+const float FLITER_NUM[][3] = {{0.3588240147, 0, 0},
+                               {1, -1.999825358, 1},
+                               {0.1754118353, 0, 0},
+                               {1, -1.999542952, 1},
+                               {0.004925392102, 0, 0},
+                               {1, 1, 0},
+                               {1, 0, 0}};
+const float FLITER_DEN[][3] = {{1, 0, 0}, {1, -1.996026397, 0.9960891008},
+                               {1, 0, 0}, {1, -1.986816645, 0.9868968725},
+                               {1, 0, 0}, {1, -0.9901492, 0},
+                               {1, 0, 0}};
+#endif
 
 static void adc_callback(ADC16_Type *adc, uint32_t flag);
+
+#pragma GCC push_options
+#pragma GCC optimize("O0")
+static void wait_core_comm(void)
+{
+    while (core_comm_ctl == NULL)
+        ;
+}
+#pragma GCC pop_options
 
 int main(void)
 {
@@ -82,8 +88,7 @@ int main(void)
 
     /* 启动CPU1并等待返回启动信息 */
     multicore_release_cpu(HPM_CORE1, SEC_CORE_IMG_START);
-    while (core_comm_ctl == NULL)
-        ;
+    wait_core_comm();
     MAIN_DEBUG("recv vofa_buf addr %p", core_comm_ctl);
 
     drv832x_init_pins();
@@ -129,8 +134,8 @@ int main(void)
     motor0.speed_pid.integral_limit = 5;
     motor0.speed_pid.output_limit = 10;
 
-    motor0.current_iq_pid.kp = 0.5f;
-    motor0.current_iq_pid.ki = 0.0f;
+    motor0.current_iq_pid.kp = 0.4f;
+    motor0.current_iq_pid.ki = 0.06f;
     motor0.current_iq_pid.integral_limit = 6;
     motor0.current_id_pid.kp = 1.6f;
     motor0.current_id_pid.ki = 0.03f;
@@ -140,11 +145,40 @@ int main(void)
     motor0.get_raw_angle_cb = motor0_get_raw_angle;
     motor0.set_pwm_cb = motor0_set_pwm;
     motor0.enable_pwm = motor0_enable_pwm;
-
+#if SPEED_FILTER_MODE == SPEED_FILTER_IIR
+    IIRFilterInit(&motor0.speed_filter, 3, FLITER_NUM, FLITER_DEN);
+#endif
     Motor_Init(&motor0);
 
+    /* 按键通过TRGM1输出0连接到PWM0内部故障输入1 */
+    HPM_IOC->PAD[IOC_PAD_PA27].FUNC_CTL = IOC_PA27_FUNC_CTL_TRGM1_P_07;
+    HPM_IOC->PAD[IOC_PAD_PA27].PAD_CTL = IOC_PAD_PAD_CTL_PE_SET(1) | IOC_PAD_PAD_CTL_PS_SET(1);
+    trgm_input_filter_t filter = {};
+    filter.mode = trgm_filter_mode_rapid_change;
+    filter.sync = true;
+    filter.invert = false;
+    filter.filter_length = TRGM_FILTCFG_FILTLEN_MASK;
+    trgm_input_filter_config(HPM_TRGM1, HPM_TRGM1_FILTER_SRC_TRGM1_IN7, &filter);
+    trgm_connect(HPM_TRGM1, HPM_TRGM1_INPUT_SRC_TRGM1_P7, HPM_TRGM1_OUTPUT_SRC_TRGM1_OUTX0, trgm_output_same_as_input,
+                 true);
+    trgm_connect(HPM_TRGM0, HPM_TRGM0_INPUT_SRC_TRGM1_OUTX0, HPM_TRGM0_OUTPUT_SRC_PWM0_FAULTI1,
+                 trgm_output_same_as_input, false);
+
+    /* 连接DRV故障线到PWM0内部故障输入0并取反 */
+    trgm_connect(HPM_TRGM0, HPM_TRGM0_INPUT_SRC_TRGM0_P6, HPM_TRGM0_OUTPUT_SRC_PWM0_FAULTI0, trgm_output_same_as_input,
+                 true);
+
+    /* PWM0采样时刻通过TRGM0输出0连接到PA25 */
+    HPM_IOC->PAD[IOC_PAD_PA25].FUNC_CTL = IOC_PA25_FUNC_CTL_TRGM1_P_05;
+    HPM_IOC->PAD[IOC_PAD_PA25].PAD_CTL = IOC_PAD_PAD_CTL_SPD_SET(3) | IOC_PAD_PAD_CTL_DS_SET(7);
+    trgm_connect(HPM_TRGM0, HPM_TRGM0_INPUT_SRC_PWM0_CH15REF, HPM_TRGM0_OUTPUT_SRC_TRGM0_OUTX0,
+                 trgm_output_same_as_input, false);
+    trgm_connect(HPM_TRGM1, HPM_TRGM1_INPUT_SRC_TRGM0_OUTX0, HPM_TRGM1_OUTPUT_SRC_TRGM1_P5,
+                 trgm_output_pulse_at_input_rising_edge, false);
+    trgm_enable_io_output(HPM_TRGM1, 1 << 5);
+
     /* PWM初始化 */
-    pwm_init(1, 60);
+    pwm_init(1, 0);
 
     /* ADC初始化 */
     adc_init();
@@ -155,17 +189,9 @@ int main(void)
     trgm_connect(HPM_TRGM0, HPM_TRGM0_INPUT_SRC_PWM0_CH8REF, HPM_TRGM0_OUTPUT_SRC_ADCX_PTRGI0A,
                  trgm_output_same_as_input, false);
 
-    trgm_connect(HPM_TRGM0, HPM_TRGM0_INPUT_SRC_PWM0_CH8REF, HPM_TRGM0_OUTPUT_SRC_TRGM0_OUTX0,
-                 trgm_output_same_as_input, false);
-    HPM_IOC->PAD[IOC_PAD_PA25].FUNC_CTL = IOC_PA25_FUNC_CTL_TRGM1_P_05;
-    HPM_IOC->PAD[IOC_PAD_PA25].PAD_CTL = IOC_PAD_PAD_CTL_SPD_SET(3) | IOC_PAD_PAD_CTL_DS_SET(7);
-    trgm_connect(HPM_TRGM1, HPM_TRGM1_INPUT_SRC_TRGM0_OUTX0, HPM_TRGM1_OUTPUT_SRC_TRGM1_P5,
-                 trgm_output_pulse_at_input_rising_edge, false);
-    trgm_enable_io_output(HPM_TRGM1, 1 << 5);
-
     /* adc中值校准程序 */
     // drv832x_calibration(true);
-    //clock_cpu_delay_ms(1);
+    // clock_cpu_delay_ms(1);
     current_calibration(&motor0);
     // drv832x_calibration(false);
 
@@ -173,13 +199,13 @@ int main(void)
     mt6701_spi_init();
 #endif
 
-    // motor0.encoder.ang_offset = 65197;
+    // motor0.encoder.ang_offset = 0x81b6;
     // motor0.encoder.pole_pairs = -7;
     if (electrical_angle_calibration(&motor0) == 0)
     {
-        // motor0.qd_current_exp.iq = 1;
-        motor0.qd_voltage_exp.iq = 0.7;
-        Motor_SetMode(&motor0, VOLTAGE_OPEN_LOOP_MODE);
+        // motor0.qd_current_exp.iq = 3;
+        // motor0.qd_voltage_exp.iq = 0.3;
+        Motor_SetMode(&motor0, CURRENT_MODE);
         adc_enable_irq(2);
         adc_enable_it();
         adc_set_callback(adc_callback);
@@ -189,16 +215,16 @@ int main(void)
     {
         if (motor0.mode == SVPWM_OPEN_LOOP_MODE)
         {
-            motor0.angle_exp += 100;
+            motor0.angle_exp += 300;
             if (motor0.angle_exp >= 65536.0f)
                 motor0.angle_exp = 0;
-            clock_cpu_delay_ms(1);
+            clock_cpu_delay_us(150);
         }
     }
     return 0;
 }
 
-    static int count = 0;
+static int count = 0;
 static void adc_callback(ADC16_Type *adc, uint32_t flag)
 {
     Motor_RunFoc(&motor0);
@@ -223,13 +249,11 @@ static void adc_callback(ADC16_Type *adc, uint32_t flag)
 
     if (vofa_write_ptr == 0)
     {
-        DCache_flush(&vofa_data[BUF_NUM / 2], sizeof(just_float_data) * BUF_NUM / 2);
         mbx_send_message(HPM_MBX0A, CORE0_VOFA_UPLOAD_BUF2);
     }
 
     if (vofa_write_ptr == BUF_NUM / 2)
     {
-        DCache_flush(&vofa_data, sizeof(just_float_data) * BUF_NUM / 2);
         mbx_send_message(HPM_MBX0A, CORE0_VOFA_UPLOAD_BUF1);
     }
     vofa_write_ptr = (vofa_write_ptr + 1);

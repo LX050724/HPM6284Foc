@@ -148,7 +148,7 @@ void vofa_push_send(MsgID buf_index)
         if (!ep_tx_busy_flag)
         {
             ep_tx_busy_flag = true;
-            usbd_ep_start_write(0x81, (uint8_t *)core_comm_ctl.vofa_buf1, sizeof(just_float_data) * BUF_NUM / 2);
+            usbd_ep_start_write(0, 0x81, (uint8_t *)core_comm_ctl.vofa_buf1, sizeof(just_float_data) * BUF_NUM / 2);
         }
     }
     else if (buf_index == CORE0_VOFA_UPLOAD_BUF2)
@@ -156,7 +156,7 @@ void vofa_push_send(MsgID buf_index)
         if (!ep_tx_busy_flag)
         {
             ep_tx_busy_flag = true;
-            usbd_ep_start_write(0x81, (uint8_t *)core_comm_ctl.vofa_buf2, sizeof(just_float_data) * BUF_NUM / 2);
+            usbd_ep_start_write(0, 0x81, (uint8_t *)core_comm_ctl.vofa_buf2, sizeof(just_float_data) * BUF_NUM / 2);
         }
     }
 }

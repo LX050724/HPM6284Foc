@@ -221,8 +221,8 @@ void adc_get_trigger0a_raw(uint16_t data[3])
 
 void adc_get_trigger0b_raw(uint16_t data[4])
 {
-    data[0] = adc1_dma_buf[4].value;
-    data[1] = adc0_dma_buf[4].value;
+    data[0] = adc0_dma_buf[4].value;
+    data[1] = adc1_dma_buf[4].value;
     data[2] = adc2_dma_buf[4].value;
     data[3] = adc1_dma_buf[5].value;
 }

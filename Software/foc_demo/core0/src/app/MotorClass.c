@@ -1,5 +1,16 @@
 #include "app/MotorClass.h"
 #include "project_config.h"
+#include <foc/iir_filter.h>
+
+#define EN_TIMER // 定义启用计算运行时间
+
+#ifdef EN_TIMER
+uint32_t time[4];
+ATTR_PLACE_AT_NONCACHEABLE float xx_time[4];
+#define GET_TIME(index) time[index] = read_csr(CSR_CYCLE);
+#else
+#define GET_TIME(index)
+#endif
 
 ATTR_RAMFUNC void Motor_RunFoc(MotorClass_t *motor)
 {
@@ -7,10 +18,13 @@ ATTR_RAMFUNC void Motor_RunFoc(MotorClass_t *motor)
     foc_sin_cos_t sin_cos;
     foc_alpha_beta_volt_t alpha_beta_voltage;
 
+    GET_TIME(0)
     if (motor->mode == DISABLE_MODE)
         return;
 
-    motor->raw_angle = motor->get_raw_angle_cb(motor);     // 获取原始角度
+    GET_TIME(1);
+    motor->raw_angle = motor->get_raw_angle_cb(motor); // 获取原始角度
+    GET_TIME(2);
     motor->get_uvw_current_cb(motor, &motor->uvw_current); // 获取三相电流
 
     if (motor->mode == SVPWM_OPEN_LOOP_MODE)
@@ -24,14 +38,24 @@ ATTR_RAMFUNC void Motor_RunFoc(MotorClass_t *motor)
         encoder_get_eleAngle_sincos(&motor->encoder, motor->raw_angle, &sin_cos);
     }
 
+#if SPEED_FILTER_MODE == SPEED_FILTER_IIR
+    int16_t diff = foc_pid_diff(motor->raw_angle, motor->speed_pll.last_ang, 65536);
+    motor->speed_pll.last_ang = motor->raw_angle;
+    motor->speed_pll.speed = IIRFilter(&motor->speed_filter, diff / 65536.f);
+    motor->speed = motor->speed_pll.speed * 60 * PWM_FREQUENCY;
+#endif
+
     /* 低速环 */
     if (++motor->intr_count >= (PWM_FREQUENCY / SPEED_PID_FREQUENCY))
     {
         motor->intr_count = 0;
-        // foc_pll(&motor->speed_pll, &sin_cos);
-        // motor->speed = motor->speed_pll.speed / motor->encoder.pole_pairs / (2 * F_PI) * 60 * SPEED_PID_FREQUENCY;
+#if SPEED_FILTER_MODE == SPEED_FILTER_PLL
+        foc_pll(&motor->speed_pll, &sin_cos);
+        motor->speed = motor->speed_pll.speed / motor->encoder.pole_pairs / (2 * F_PI) * 60 * SPEED_PID_FREQUENCY;
+#elif SPEED_FILTER_MODE == SPEED_FILTER_PLL2
         foc_pll2(&motor->speed_pll, motor->raw_angle);
         motor->speed = motor->speed_pll.speed * 60 * SPEED_PID_FREQUENCY;
+#endif
         if (motor->mode == ANGLE_MODE)
         {
             int diff = foc_pid_diff(motor->raw_angle, motor->angle_exp, 65536);
@@ -49,7 +73,8 @@ ATTR_RAMFUNC void Motor_RunFoc(MotorClass_t *motor)
     {
         motor->power =
             (motor->qd_voltage_exp.iq * motor->qd_current.iq + motor->qd_voltage_exp.id * motor->qd_current.id) *
-            motor->bus_voltage * 0.75f + 1.5f; // 估计值 0.75补偿系数，1.5静态功耗
+                motor->bus_voltage * 0.75f +
+            1.5f; // 估计值 0.75补偿系数，1.5静态功耗
 
         foc_clarke(&motor->uvw_current, &alpha_beta_current);
         foc_park(&alpha_beta_current, &sin_cos, &motor->qd_current);
@@ -62,6 +87,14 @@ ATTR_RAMFUNC void Motor_RunFoc(MotorClass_t *motor)
     foc_inv_park(&motor->qd_voltage_exp, &sin_cos, &alpha_beta_voltage);
     foc_svpwm(&alpha_beta_voltage, &motor->pwm);
     motor->set_pwm_cb(motor, &motor->pwm);
+    GET_TIME(3);
+
+#ifdef EN_TIMER
+    xx_time[0] = (time[1] - time[0]) / 600.0f; // 进入耗时
+    xx_time[1] = (time[2] - time[1]) / 600.0f; // 编码器数耗时
+    xx_time[2] = (time[3] - time[2]) / 600.0f; // 三角函&环耗时
+    xx_time[3] = (time[3] - time[0]) / 600.0f; // 总耗时
+#endif
 }
 
 void Motor_Init(MotorClass_t *motor)

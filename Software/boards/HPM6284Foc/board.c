@@ -19,6 +19,8 @@
 #include "hpm_trgm_drv.h"
 #include "hpm_pllctlv2_drv.h"
 #include "hpm_pcfg_drv.h"
+#include <math.h>
+#include <stdint.h>
 
 static board_timer_cb timer_cb;
 
@@ -736,4 +738,31 @@ uint32_t board_init_uart_clock(UART_Type *ptr)
         /* Not supported */
     }
     return freq;
+}
+
+/**
+ * @brief 计算电阻分压下侧电阻阻值，Vcc=3.3V
+ * 
+ * @param R1 
+ * @param volate 
+ * @return float 
+ */
+float volateToR2(float R1, float volate)
+{
+    float I = (3.3f - volate) / R1;
+    return volate / I;
+}
+
+/**
+ * @brief NTC温度计算 B=3950@Ta=25,Tb=50
+ *
+ * @param _R1       当前温度下的电阻
+ * @param _R2       T2温度电阻
+ * @return float    返回的就是当前温度(℃)
+ */
+float resistanceToTemperature(float _R1, float _R2)
+{
+    float _B = 3950;
+    float _T2 = 25;
+    return (1.0f / ((1.0f / _B) * logf(_R1 / _R2) + (1.0f / (_T2 + 273.15f))) - 273.15f);
 }

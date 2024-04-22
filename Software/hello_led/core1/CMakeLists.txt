@@ -3,6 +3,8 @@
 
 cmake_minimum_required(VERSION 3.13)
 
+set(SES_TOOLCHAIN_VARIANT "Andes")
+
 set(CMAKE_BUILD_TYPE sec_core_img)
 set(BUILD_FOR_SECONDARY_CORE 1)
 set(SEC_CORE_IMG_C_ARRAY_OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/../core0/src/sec_core_img.c)
@@ -10,9 +12,8 @@ set(SEC_CORE_IMG_C_ARRAY_OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/../core0/src/sec_cor
 find_package(hpm-sdk REQUIRED HINTS $ENV{HPM_SDK_BASE})
 
 project(multicore_core1)
-sdk_ses_compile_options(-mabi=ilp32f)
-sdk_ses_compile_options(-march=rv32imafc)
-sdk_ses_compile_options(-O3)
+sdk_ses_compile_options(-mabi=ilp32d)
+sdk_ses_compile_options(-march=rv32gc)
 sdk_ses_opt_debug_connection(J-Link)
 
 sdk_inc(src)

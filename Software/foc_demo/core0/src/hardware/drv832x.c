@@ -51,7 +51,6 @@ void drv832x_init_pins()
     gpio_write_pin(HPM_GPIO0, GPIO_DO_GPIOZ, 2, 0);
 
     HPM_IOC->PAD[BOARD_DRV8323_PIN_nFAULT].FUNC_CTL = IOC_PB26_FUNC_CTL_TRGM0_P_06;
-    trgm_disable_io_output(HPM_TRGM0, 1 << 6);
 }
 
 void drv832x_enable(bool en)

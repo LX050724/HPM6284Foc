@@ -23,12 +23,12 @@ typedef struct
 static inline void current_get_cal(CurrentCal_t *self, uint16_t raw[3], foc_uvw_current_t *cur)
 {
 #if ADC_ENABLE_FILTER == 1
-    cur->iu = adc_voltage(((raw[0] + self->last_adc_raw_u) >> 1) - self->adc_calibration_u) / CURRENT_COE;
-    cur->iv = adc_voltage(((raw[1] + self->last_adc_raw_v) >> 1) - self->adc_calibration_v) / CURRENT_COE;
-    cur->iw = adc_voltage(((raw[2] + self->last_adc_raw_w) >> 1) - self->adc_calibration_w) / CURRENT_COE;
-    self->last_adc_raw_u = raw[0];
-    self->last_adc_raw_v = raw[1];
-    self->last_adc_raw_w = raw[2];
+    cur->iu = adc_voltage(((raw[0] + self->last_adc_raw_a) >> 1) - self->adc_calibration_a) / -CURRENT_COE;
+    cur->iv = adc_voltage(((raw[1] + self->last_adc_raw_b) >> 1) - self->adc_calibration_b) / -CURRENT_COE;
+    cur->iw = adc_voltage(((raw[2] + self->last_adc_raw_c) >> 1) - self->adc_calibration_c) / -CURRENT_COE;
+    self->last_adc_raw_a = raw[0];
+    self->last_adc_raw_b = raw[1];
+    self->last_adc_raw_c = raw[2];
 #else
     cur->iu = adc_voltage(raw[0] - self->adc_calibration_a) / -CURRENT_COE;
     cur->iv = adc_voltage(raw[1] - self->adc_calibration_b) / -CURRENT_COE;

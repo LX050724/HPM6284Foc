@@ -1,9 +1,9 @@
 #pragma once
 
-#include <stdint.h>
 #include "fast_sin.h"
 #include "hpm_common.h"
 #include <project_config.h>
+#include <stdint.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -49,7 +49,7 @@ typedef struct
 
 /**
  * @brief 快速三角函数
- * 
+ *
  * @param x 输入弧度
  * @param ang 输出正弦余弦值
  */
@@ -60,7 +60,7 @@ static ATTR_ALWAYS_INLINE void foc_sin_cos(float x, foc_sin_cos_t *ang)
 
 /**
  * @brief 0矢量注入法SVPWM
- * 
+ *
  * @param volt [in] 输入电压，有效范围[-1,1]
  * @param pwm [out] 输出PWM值
  */
@@ -68,7 +68,7 @@ void foc_svpwm(const foc_alpha_beta_volt_t *volt, foc_pwm_t *pwm);
 
 /**
  * @brief park变换
- * 
+ *
  * @param in alpha beta电流
  * @param ang 电角度正余弦
  * @param out qd电流
@@ -77,7 +77,7 @@ void foc_park(const foc_alpha_beta_current_t *in, const foc_sin_cos_t *ang, foc_
 
 /**
  * @brief park逆变换
- * 
+ *
  * @param in qd电压
  * @param ang 电角度正余弦
  * @param out alpha beta电压
@@ -86,7 +86,7 @@ void foc_inv_park(const foc_qd_current_t *in, const foc_sin_cos_t *ang, foc_alph
 
 /**
  * @brief clarke变换
- * 
+ *
  * @param in 三相电流
  * @param out alpha beta电流
  */

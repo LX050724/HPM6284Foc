@@ -3,6 +3,7 @@
 
 cmake_minimum_required(VERSION 3.13)
 
+set(SES_TOOLCHAIN_VARIANT "Andes")
 set(CONFIG_CHERRYUSB 1)
 set(CONFIG_USB_DEVICE 1)
 set(CONFIG_USB_DEVICE_CDC 1)
@@ -14,13 +15,12 @@ set(SEC_CORE_IMG_C_ARRAY_OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/../core0/src/sec_cor
 find_package(hpm-sdk REQUIRED HINTS $ENV{HPM_SDK_BASE})
 
 project(multicore_core1)
-sdk_ses_compile_options(-mabi=ilp32f)
-sdk_ses_compile_options(-march=rv32imafc)
-sdk_ses_compile_options(-O3)
+sdk_ses_compile_options(-mabi=ilp32d)
+sdk_ses_compile_options(-march=rv32gc)
 sdk_ses_opt_debug_connection(J-Link)
 
 sdk_inc(src)
-sdk_inc(src/usb)
+sdk_inc($ENV{HPM_SDK_BASE}/samples/cherryusb/config)
 sdk_app_inc(${CMAKE_CURRENT_LIST_DIR}/../public)
 
 file(GLOB_RECURSE SRC_FILES src/*.c)

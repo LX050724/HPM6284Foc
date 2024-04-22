@@ -283,8 +283,8 @@
 #define BOARD_BLDC_ADC_A_BASE                  HPM_ADC0
 #define BOARD_BLDC_ADC_B_BASE                  HPM_ADC2
 #define BOARD_BLDC_ADC_C_BASE                  HPM_ADC1
-#define BOARD_BLDC_VOL_ADC_A_BASE              HPM_ADC1
-#define BOARD_BLDC_VOL_ADC_B_BASE              HPM_ADC0
+#define BOARD_BLDC_VOL_ADC_A_BASE              HPM_ADC0
+#define BOARD_BLDC_VOL_ADC_B_BASE              HPM_ADC1
 #define BOARD_BLDC_VOL_ADC_C_BASE              HPM_ADC2
 #define BOARD_BLDC_VOL_ADC_BUS_BASE            HPM_ADC1
 
@@ -293,8 +293,8 @@
 #define BOARD_BLDC_ADC_CH_A                    (12U)
 #define BOARD_BLDC_ADC_CH_B                    (3U)
 #define BOARD_BLDC_ADC_CH_C                    (6U)
-#define BOARD_BLDC_VOL_ADC_CH_A                (3U)
-#define BOARD_BLDC_VOL_ADC_CH_B                (8U)
+#define BOARD_BLDC_VOL_ADC_CH_A                (8U)
+#define BOARD_BLDC_VOL_ADC_CH_B                (3U)
 #define BOARD_BLDC_VOL_ADC_CH_C                (1U)
 #define BOARD_BLDC_VOL_ADC_CH_BUS              (2U)
 #define BOARD_BLDC_ADC_A_SAMPLE_CLCYE          (30U)
@@ -579,6 +579,9 @@ void board_ungate_mchtmr_at_lp_mode(void);
 
 /* Initialize the UART clock */
 uint32_t board_init_uart_clock(UART_Type *ptr);
+
+float volateToR2(float R1, float volate);
+float resistanceToTemperature(float _R1, float _R2);
 
 #if defined(__cplusplus)
 }

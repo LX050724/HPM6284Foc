@@ -1,5 +1,7 @@
 **/.cache
 **/*build*
+**/*flash_xip*
+**/*sec_core_img*
 pinmap_pinmux.c
 pinmap_pinmux.h
 sec_core_img.c

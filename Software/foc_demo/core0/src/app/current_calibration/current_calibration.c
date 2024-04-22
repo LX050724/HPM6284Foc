@@ -8,7 +8,7 @@
 
 #define CURRCAL_DEBUG(fmt, ...) DEBUG("CC", fmt, ##__VA_ARGS__)
 
-static int calibration_status;
+static volatile int calibration_status;
 static int calibration[3];
 static uint32_t calibration_count;
 static MotorClass_t *gpMotor;

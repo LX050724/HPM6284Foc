@@ -3,6 +3,7 @@
 #include "foc/foc_core.h"
 #include "foc/foc_pid.h"
 #include "foc/foc_pll.h"
+#include "foc/iir_filter.h"
 #include "hardware/current/current.h"
 #include "hardware/encoder/encoder.h"
 #include <stdint.h>
@@ -30,7 +31,11 @@ typedef struct MotorClass_t
 
     encoder_t encoder;
     CurrentCal_t current_cal;
+
     foc_pll_t speed_pll;
+#if SPEED_FILTER_MODE == SPEED_FILTER_IIR
+    IIRFilter_t speed_filter;
+#endif
 
     foc_pid_contrl_t angle_pid;
     foc_pid_contrl_t speed_pid;
@@ -48,7 +53,7 @@ typedef struct MotorClass_t
     foc_uvw_current_t uvw_current;
     foc_qd_current_t qd_current;
     foc_pwm_t pwm;
-    
+
     float speed;
     uint16_t raw_angle;
 
