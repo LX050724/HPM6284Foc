@@ -146,7 +146,7 @@ void usbd_cdc_acm_bulk_out(uint8_t busid, uint8_t ep, uint32_t nbytes)
     USB_LOG_RAW("actual out len:%d\r\n", nbytes);
 
     usbd_ep_start_read(busid, ep, &read_buffer[0], CDC_MAX_MPS);
-    usbd_ep_start_write(busid, CDC_IN_EP, &read_buffer[0], nbytes);
+    usbd_read_callback(&read_buffer[0], nbytes);
 }
 
 void usbd_cdc_acm_bulk_in(uint8_t busid, uint8_t ep, uint32_t nbytes)
