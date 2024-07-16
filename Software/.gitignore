@@ -5,3 +5,4 @@
 pinmap_pinmux.c
 pinmap_pinmux.h
 sec_core_img.c
+/io_test

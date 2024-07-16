@@ -25,7 +25,7 @@ extern "C" {
 #define ENCODER_TYPE ENCODER_MT6701 // 编码器类型
 
 /* 时间参数 */
-#define PWM_FREQUENCY 100000                    // PWM频率(Hz) 根据散热条件 Max: 100KHz@24V, 50Khz@48V
+#define PWM_FREQUENCY 50000                    // PWM频率(Hz) 根据散热条件 Max: 100KHz@24V, 50Khz@48V
 #define SPEED_PID_FREQUENCY 5000                // 速度、位置环频率(Hz)
 #define ELECTRICAL_ANGLE_CALIBRATION_POWER 0.4f // 电角度校准油门
 #define ELECTRICAL_ANGLE_CALIBRATION_DELAY 500  // 电角度校准延迟(ms)
@@ -35,8 +35,8 @@ extern "C" {
 #define CURRENT_AMP 20                                // 电流运放放大倍数 5/10/20/40
 #define CURRENT_COE (SAMPLING_RESISTOR * CURRENT_AMP) // 电流系数 V/A
 #define VOLTAGE_AMP 20.0f                             // 母线电压放大倍数
-#define ADC_IGNORE_BIT 0                              // ADC低位舍弃
-#define ADC_ENABLE_FILTER 0                           // 启用2位滑动平均滤波
+#define ADC_IGNORE_BIT 5                              // ADC低位舍弃
+#define ADC_ENABLE_FILTER 1                           // 启用2位滑动平均滤波
 #define ADC_CALIBRATION_TIMES 1024                    // ADC校准采样次数
 
 /* 启用HRPWM */
@@ -54,7 +54,7 @@ extern "C" {
  * @note 限幅矢量模不能超过 2/√3 * 0.96
  *       其中0.96为PWM最大占空比
  */
-#define UQ_LIMIT 0.9f // Q轴电压限幅
+#define UQ_LIMIT 0.8f // Q轴电压限幅
 #define UD_LIMIT 0.2f // D轴电压限幅
 
 /* 不可修改 */

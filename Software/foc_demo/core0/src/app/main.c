@@ -199,9 +199,9 @@ int main(void)
     mt6701_spi_init();
 #endif
 
-    // motor0.encoder.ang_offset = 0x81b6;
-    // motor0.encoder.pole_pairs = -7;
-    if (electrical_angle_calibration(&motor0) == 0)
+    motor0.encoder.ang_offset = 0x81b6;
+    motor0.encoder.pole_pairs = -7;
+    // if (electrical_angle_calibration(&motor0) == 0)
     {
         // motor0.qd_current_exp.iq = 3;
         // motor0.qd_voltage_exp.iq = 0.3;

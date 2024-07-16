@@ -1,14 +1,25 @@
 import serial
 import time
-com = serial.Serial('COM9')
+com = serial.Serial('COM15', timeout=5)
+
+com.dtr = 0
+com.dtr = 1
+
+print('open success')
 
 total_len = 0
+pack_len = 1024 * 1024
+receive_len = 1000 * 1024 * 1024
 
 try:
     t1 = time.monotonic()
-    while data := com.read(65536):
+    while data := com.read(pack_len):
         total_len += len(data)
+        if total_len >= receive_len:
+            break
 except KeyboardInterrupt:
+    ...
+finally:
     t2 = time.monotonic()
 
 t = t2-t1

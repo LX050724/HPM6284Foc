@@ -8,7 +8,7 @@ set(CONFIG_CHERRYUSB 1)
 set(CONFIG_USB_DEVICE 1)
 set(CONFIG_USB_DEVICE_CDC 1)
 
-set(CMAKE_BUILD_TYPE sec_core_img)
+set(HPM_BUILD_TYPE "sec_core_img")
 set(BUILD_FOR_SECONDARY_CORE 1)
 set(SEC_CORE_IMG_C_ARRAY_OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/../core0/src/sec_core_img.c)
 

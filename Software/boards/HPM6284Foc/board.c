@@ -8,7 +8,6 @@
 #include "board.h"
 #include "hpm_uart_drv.h"
 #include "hpm_gptmr_drv.h"
-#include "hpm_lcdc_drv.h"
 #include "hpm_i2c_drv.h"
 #include "hpm_gpio_drv.h"
 #include "pinmux.h"
@@ -521,7 +520,7 @@ void board_init_clock(void)
     clock_add_to_group(clock_mot2, 0);
     clock_add_to_group(clock_mot3, 0);
     clock_add_to_group(clock_acmp, 0);
-    clock_add_to_group(clock_msyn, 0);
+    clock_add_to_group(clock_synt, 0);
     clock_add_to_group(clock_lmm0, 0);
     clock_add_to_group(clock_lmm1, 0);
 
