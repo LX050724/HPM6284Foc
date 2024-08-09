@@ -36,7 +36,7 @@ static inline void current_get_cal(CurrentCal_t *self, uint16_t raw[3], foc_uvw_
 #endif
 }
 
-static inline void current_set_calibration(CurrentCal_t *self, int32_t value[3])
+static inline void current_set_calibration(CurrentCal_t *self, int value[3])
 {
     self->adc_calibration_a = value[0];
     self->adc_calibration_b = value[1];

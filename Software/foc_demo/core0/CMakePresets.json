@@ -1,0 +1,31 @@
+{
+    "version": 3,
+    "configurePresets": [
+        {
+            "name": "default",
+            "hidden": true,
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build",
+            "cacheVariables": {
+                "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+                "BOARD_SEARCH_PATH": "${sourceDir}/../../boards",
+                "HPM_BUILD_TYPE": "flash_xip",
+                "BOARD": "HPM6284Foc"
+            }
+        },
+        {
+            "name": "flash_xip Debug",
+            "inherits": "default",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug"
+            }
+        },
+        {
+            "name": "flash_xip Release",
+            "inherits": "default",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release"
+            }
+        }
+    ]
+}

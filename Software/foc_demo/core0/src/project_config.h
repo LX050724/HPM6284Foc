@@ -7,7 +7,7 @@
 extern "C" {
 #endif
 
-#define DEBUG(NAME, fmt, ...) printf("[" NAME "] " fmt "\n", ##__VA_ARGS__)
+#define DLOG(NAME, fmt, ...) printf("[" NAME "] " fmt "\n", ##__VA_ARGS__)
 
 /* 编码器接口类型 */
 #define ENCODER_INTERFACE_IIC 2
@@ -23,9 +23,11 @@ extern "C" {
 #define ENCODER_LINEAR_HALL (ENCODER_INTERFACE_LINEAR_HALL << 8 | 4)
 
 #define ENCODER_TYPE ENCODER_MT6701 // 编码器类型
+#define ENCODER_MAX 0xffffff        // 编码器最大值
+#define ENCODER_INVALID ((uint32_t) - 1)
 
 /* 时间参数 */
-#define PWM_FREQUENCY 50000                    // PWM频率(Hz) 根据散热条件 Max: 100KHz@24V, 50Khz@48V
+#define PWM_FREQUENCY 50000                     // PWM频率(Hz) 根据散热条件 Max: 100KHz@24V, 50Khz@48V
 #define SPEED_PID_FREQUENCY 5000                // 速度、位置环频率(Hz)
 #define ELECTRICAL_ANGLE_CALIBRATION_POWER 0.4f // 电角度校准油门
 #define ELECTRICAL_ANGLE_CALIBRATION_DELAY 500  // 电角度校准延迟(ms)
@@ -74,8 +76,14 @@ extern "C" {
 #error "ADC_CALIBRATION_TIMES > 65536"
 #endif
 
+#if ENCODER_MAX > 0xffffff
+#error "ENCODER_MAX > 0xffffff"
+#endif
+
 #define GET_ENCODER_INTERFACE(x) (((x) >> 8) & 0xff)
 #define DMA_ATTR ATTR_PLACE_AT_NONCACHEABLE ATTR_ALIGN(64)
+
+#define CPU_Delay(ms) clock_cpu_delay_ms(ms)
 
 #ifdef __cplusplus
 }

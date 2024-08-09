@@ -1,6 +1,8 @@
 #include "app/MotorClass.h"
+#include "hpm_clock_drv.h"
 #include "project_config.h"
 #include <foc/iir_filter.h>
+#include <stdint.h>
 
 #define EN_TIMER // 定义启用计算运行时间
 
@@ -30,7 +32,7 @@ ATTR_RAMFUNC void Motor_RunFoc(MotorClass_t *motor)
     if (motor->mode == SVPWM_OPEN_LOOP_MODE)
     {
         /* svpwm开环模式使用angle_exp作为角度输入 */
-        foc_sin_cos(motor->angle_exp * (2.0f * F_PI / 65536.0f), &sin_cos);
+        foc_sin_cos(motor->angle_exp * (2.0f * F_PI / ENCODER_MAX), &sin_cos);
     }
     else
     {
@@ -39,9 +41,9 @@ ATTR_RAMFUNC void Motor_RunFoc(MotorClass_t *motor)
     }
 
 #if SPEED_FILTER_MODE == SPEED_FILTER_IIR
-    int16_t diff = foc_pid_diff(motor->raw_angle, motor->speed_pll.last_ang, 65536);
+    int16_t diff = foc_pid_diff(motor->raw_angle, motor->speed_pll.last_ang, ENCODER_MAX);
     motor->speed_pll.last_ang = motor->raw_angle;
-    motor->speed_pll.speed = IIRFilter(&motor->speed_filter, diff / 65536.f);
+    motor->speed_pll.speed = IIRFilter(&motor->speed_filter, (float)diff / ENCODER_MAX);
     motor->speed = motor->speed_pll.speed * 60 * PWM_FREQUENCY;
 #endif
 
@@ -58,7 +60,7 @@ ATTR_RAMFUNC void Motor_RunFoc(MotorClass_t *motor)
 #endif
         if (motor->mode == ANGLE_MODE)
         {
-            int diff = foc_pid_diff(motor->raw_angle, motor->angle_exp, 65536);
+            int diff = foc_pid_diff(motor->raw_angle, motor->angle_exp, ENCODER_MAX);
             motor->speed_exp = foc_pi_controller(&motor->angle_pid, diff, 0);
         }
 
@@ -67,17 +69,15 @@ ATTR_RAMFUNC void Motor_RunFoc(MotorClass_t *motor)
             motor->qd_current_exp.iq = foc_pi_controller(&motor->speed_pid, motor->speed, motor->speed_exp);
         }
     }
+    motor->power = (motor->qd_voltage_exp.iq * motor->qd_current.iq + motor->qd_voltage_exp.id * motor->qd_current.id) *
+                       motor->bus_voltage * 0.75f +
+                   1.5f; // 估计值 0.75补偿系数，1.5静态功耗
+    foc_clarke(&motor->uvw_current, &alpha_beta_current);
+    foc_park(&alpha_beta_current, &sin_cos, &motor->qd_current);
 
     /* 电流环或更上层环计算 */
     if (motor->mode >= CURRENT_MODE)
     {
-        motor->power =
-            (motor->qd_voltage_exp.iq * motor->qd_current.iq + motor->qd_voltage_exp.id * motor->qd_current.id) *
-                motor->bus_voltage * 0.75f +
-            1.5f; // 估计值 0.75补偿系数，1.5静态功耗
-
-        foc_clarke(&motor->uvw_current, &alpha_beta_current);
-        foc_park(&alpha_beta_current, &sin_cos, &motor->qd_current);
         motor->qd_voltage_exp.iq =
             foc_pi_controller(&motor->current_iq_pid, motor->qd_current.iq, motor->qd_current_exp.iq);
         motor->qd_voltage_exp.id =
@@ -90,10 +90,11 @@ ATTR_RAMFUNC void Motor_RunFoc(MotorClass_t *motor)
     GET_TIME(3);
 
 #ifdef EN_TIMER
-    xx_time[0] = (time[1] - time[0]) / 600.0f; // 进入耗时
-    xx_time[1] = (time[2] - time[1]) / 600.0f; // 编码器数耗时
-    xx_time[2] = (time[3] - time[2]) / 600.0f; // 三角函&环耗时
-    xx_time[3] = (time[3] - time[0]) / 600.0f; // 总耗时
+    float tmp = clock_get_frequency(clock_cpu0) / 1e6f;
+    xx_time[0] = (time[1] - time[0]) / tmp; // 进入耗时
+    xx_time[1] = (time[2] - time[1]) / tmp; // 编码器数耗时
+    xx_time[2] = (time[3] - time[2]) / tmp; // 三角函&环耗时
+    xx_time[3] = (time[3] - time[0]) / tmp; // 总耗时
 #endif
 }
 

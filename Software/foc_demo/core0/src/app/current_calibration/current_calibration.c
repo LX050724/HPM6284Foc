@@ -1,12 +1,10 @@
 #include "current_calibration.h"
-#include "board.h"
 #include "hardware/adc_init.h"
-#include "hardware/hrpwm.h"
-#include "hpm_clock_drv.h"
 #include "project_config.h"
+#include <stdbool.h>
 #include <stdint.h>
 
-#define CURRCAL_DEBUG(fmt, ...) DEBUG("CC", fmt, ##__VA_ARGS__)
+#define CURRCAL_DEBUG(fmt, ...) DLOG("CC", fmt, ##__VA_ARGS__)
 
 static volatile int calibration_status;
 static int calibration[3];
@@ -16,12 +14,18 @@ static MotorClass_t *gpMotor;
 static void __adc_cb(ADC16_Type *adc, uint32_t flag)
 {
     uint16_t adc_raw[3] = {};
-    adc_get_trigger0a_raw(adc_raw);
+    if (calibration_status != 1)
+        return;
 
-    calibration[0] += adc_raw[0];
-    calibration[1] += adc_raw[1];
-    calibration[2] += adc_raw[2];
-    if (++calibration_count >= ADC_CALIBRATION_TIMES)
+    if (calibration_count < ADC_CALIBRATION_TIMES)
+    {
+        adc_get_trigger0a_raw(adc_raw);
+        calibration[0] += adc_raw[0];
+        calibration[1] += adc_raw[1];
+        calibration[2] += adc_raw[2];
+        calibration_count += 1;
+    }
+    else
     {
         calibration[0] /= ADC_CALIBRATION_TIMES;
         calibration[1] /= ADC_CALIBRATION_TIMES;
@@ -33,8 +37,8 @@ static void __adc_cb(ADC16_Type *adc, uint32_t flag)
 
 int current_calibration(MotorClass_t *motor)
 {
-    pwm_disable_all_output();
-    clock_cpu_delay_ms(500);
+    motor->enable_pwm(motor, false);
+    CPU_Delay(500);
 
     gpMotor = motor;
     calibration[0] = 0;

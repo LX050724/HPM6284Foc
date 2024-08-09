@@ -1,0 +1,20 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "cmake",
+			"label": "CMake: 生成",
+			"command": "build",
+			"targets": [
+				"all"
+			],
+			"preset": "${command:cmake.activeBuildPresetName}",
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			},
+			"problemMatcher": [],
+			"detail": "CMake 模板 生成 任务"
+		}
+	]
+}

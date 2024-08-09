@@ -29,7 +29,7 @@
 #include "stdbool.h"
 #include <core_comm.h>
 
-#define MAIN_DEBUG(fmt, ...) DEBUG("MAIN", fmt, ##__VA_ARGS__)
+#define MAIN_DEBUG(fmt, ...) DLOG("MAIN", fmt, ##__VA_ARGS__)
 
 static void motor0_get_uvw_current(MotorClass_t *motor, foc_uvw_current_t *uvw_current);
 static uint16_t motor0_get_raw_angle(MotorClass_t *motor);
@@ -266,7 +266,7 @@ void isr_mbx(void)
 {
     volatile uint32_t sr = HPM_MBX0A->SR;
     volatile uint32_t cr = HPM_MBX0A->CR;
-    uint32_t msg;
+    uint32_t msg = 0;
 
     if (!((sr & MBX_SR_RWMV_MASK) && (cr & MBX_CR_RWMVIE_MASK)))
         return;

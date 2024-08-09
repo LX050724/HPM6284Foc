@@ -48,12 +48,9 @@ void adc_init()
     adc_pmt_config_t pmt_cfg;
     cfg.module = ADCX_MODULE_ADC16;
 
-    adc0.module = adc_module_adc16,
-    adc0.adc_base.adc16 = HPM_ADC0;
-    adc1.module = adc_module_adc16,
-    adc1.adc_base.adc16 = HPM_ADC1;
-    adc2.module = adc_module_adc16,
-    adc2.adc_base.adc16 = HPM_ADC2;
+    adc0.module = adc_module_adc16, adc0.adc_base.adc16 = HPM_ADC0;
+    adc1.module = adc_module_adc16, adc1.adc_base.adc16 = HPM_ADC1;
+    adc2.module = adc_module_adc16, adc2.adc_base.adc16 = HPM_ADC2;
 
     board_init_adc16_pins();
 

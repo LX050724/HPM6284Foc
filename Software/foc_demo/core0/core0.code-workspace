@@ -7,5 +7,7 @@
 			"path": "../core1"
 		}
 	],
-	"settings": {}
+	"settings": {
+		"cmake.useCMakePresets": "always"
+	}
 }

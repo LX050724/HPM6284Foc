@@ -73,7 +73,7 @@ extern "C" {
 
 #define DRV_REG_ADDR(REG) (((REG) >> 16) & 0xff)
 #define DRV_REG_MASK(REG) (((REG) >> 8) & 0xff)
-#define DRV_REG_SHIF(REG) ((REG)&0xff)
+#define DRV_REG_SHIF(REG) ((REG) & 0xff)
 
 typedef enum
 {
@@ -137,7 +137,6 @@ enum
     ONE_PWM_COM_SYNC,  // 0b = 1x PWM mode uses synchronous rectification
     ONE_PWM_COM_ASYNC, // 1b = 1x PWM mode uses asynchronous rectification (diode freewheeling)
 };
-
 
 /**
  * @brief Gate Drive LS Register (address = 0x04)

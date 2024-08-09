@@ -13,7 +13,7 @@
 
 static spi_control_config_t control_config = {};
 
-#define DRV_DBG(fmt, ...) DEBUG("DRV", fmt, ##__VA_ARGS__)
+#define DRV_DBG(fmt, ...) DLOG("DRV", fmt, ##__VA_ARGS__)
 
 static void spi_transfer_mode_print(spi_control_config_t *config)
 {
@@ -184,11 +184,11 @@ void drv832x_dump_regs()
 #define XX(ADDR)                                                                                                       \
     if ((stat = drv832x_read_reg(ADDR, &data)) == status_success)                                                      \
     {                                                                                                                  \
-        DRV_DBG("[%d]%-16s: %#06x", ADDR, (#ADDR) + 9, data);                                                        \
+        DRV_DBG("[%d]%-16s: %#06x", ADDR, (#ADDR) + 9, data);                                                          \
     }                                                                                                                  \
     else                                                                                                               \
     {                                                                                                                  \
-        DRV_DBG("drv832x_read_reg error %d", stat);                                                                  \
+        DRV_DBG("drv832x_read_reg error %d", stat);                                                                    \
     }
 
     XX(DRV_ADDR_FALULT_STA)

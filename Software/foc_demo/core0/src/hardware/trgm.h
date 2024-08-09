@@ -11,7 +11,7 @@ extern "C" {
 
 /**
  * @brief 连接trgm信号
- * 
+ *
  * @param input 输入源 HPM_TRGM0_INPUT_SRC_xxxxx
  * @param output 输出 HPM_TRGM0_OUTPUT_SRC_xxxxx
  * @param type 输出类型

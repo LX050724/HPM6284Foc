@@ -1,0 +1,31 @@
+{
+    "version": 3,
+    "configurePresets": [
+        {
+            "name": "default",
+            "hidden": true,
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build",
+            "cacheVariables": {
+                "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+                "BOARD_SEARCH_PATH": "${sourceDir}/../../boards",
+                "HPM_BUILD_TYPE": "sec_core_img",
+                "BOARD": "HPM6284Foc"
+            }
+        },
+        {
+            "name": "sec_core_img Debug",
+            "inherits": "default",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug"
+            }
+        },
+        {
+            "name": "sec_core_img Release",
+            "inherits": "default",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release"
+            }
+        }
+    ]
+}

@@ -16,7 +16,6 @@ void adc_init();
 
 void adc_set_callback(adc_callback_t cb);
 
-
 static inline float adc_voltage(int raw)
 {
     return (raw >> ADC_IGNORE_BIT) * 3.3f / (65536 >> ADC_IGNORE_BIT);
@@ -61,18 +60,17 @@ uint16_t adc_get_ntc2_raw();
 
 /**
  * @brief current A, B, C
- * 
- * @param data 
+ *
+ * @param data
  */
 void adc_get_trigger0a_raw(uint16_t data[3]);
 
 /**
  * @brief volate A, B, C, BUS
- * 
- * @param data 
+ *
+ * @param data
  */
 void adc_get_trigger0b_raw(uint16_t data[4]);
-
 
 #ifdef __cplusplus
 }

@@ -2,13 +2,13 @@
 #include "foc/fast_sin.h"
 #include "foc/foc_core.h"
 #include "hardware/encoder/encoder.h"
-#include "hardware/hrpwm.h"
 #include "hpm_clock_drv.h"
+#include "project_config.h"
 #include <math.h>
+#include <stdbool.h>
 #include <stdint.h>
 
-#define EACAL_DEBUG(fmt, ...) DEBUG("EC", fmt, ##__VA_ARGS__)
-
+#define EACAL_DEBUG(fmt, ...) DLOG("EC", fmt, ##__VA_ARGS__)
 
 void force_drive(MotorClass_t *motor, float ang, float power)
 {
@@ -24,98 +24,143 @@ void force_drive(MotorClass_t *motor, float ang, float power)
     motor->set_pwm_cb(motor, &pwm);
 }
 
-float LeastSquareLinearFit(int y[], const int num, float *a, float *b)
+float_t LeastSquareLinearFit(const int32_t y[], const int num, float_t *k, float_t *b)
 {
-    float sum_x2 = 0;
-    float sum_y = 0;
-    float sum_x = 0;
-    float sum_xy = 0;
-    float sum_q = 0;
+    float_t sum_x2 = 0;
+    float_t sum_y = 0;
+    float_t sum_x = 0;
+    float_t sum_xy = 0;
 
     for (int i = 0; i < num; i++)
     {
-        float x = F_PI * i / 6;
+        float_t x = F_PI * i / 6;
         sum_x2 += x * x;
         sum_y += y[i];
         sum_x += x;
         sum_xy += x * y[i];
     }
+    float_t ave_x = sum_x / num, ave_y = sum_y / num;
 
-    *a = (sum_x2 * sum_y - sum_x * sum_xy) / (num * sum_x2 - sum_x * sum_x);
-    *b = (num * sum_xy - sum_x * sum_y) / (num * sum_x2 - sum_x * sum_x);
+    *k = (num * sum_xy - sum_x * sum_y) / (num * sum_x2 - sum_x * sum_x);
+    *b = ave_y - (*k) * ave_x;
 
+    float_t sum_cov = 0;
+    float_t sum_dx2 = 0, sum_dy2 = 0;
     for (int i = 0; i < num; i++)
     {
-        float ya = y[i] - (*a) - (*b) * (F_PI * i / 6);
-        sum_q += ya * ya;
+        float_t dx = F_PI * i / 6 - ave_x;
+        float_t dy = y[i] - ave_y;
+        sum_cov += dx * dy;
+        sum_dx2 += dx * dx;
+        sum_dy2 += dy * dy;
     }
 
-    return sqrtf(sum_q / num);
+    return powf(sum_cov / (sqrtf(sum_dx2) * sqrtf(sum_dy2)), 2);
 }
 
+static int32_t get_ang(MotorClass_t *motor)
+{
+    uint32_t t;
+    int retry = 0;
+    do
+    {
+        t = motor->get_raw_angle_cb(motor);
+    } while (t != ENCODER_INVALID && retry++ < 5);
+    return (int32_t)t;
+}
 int electrical_angle_calibration(MotorClass_t *motor)
 {
-    pwm_enable_all_output();
-    int ang_table[12];
+    int32_t ang_table_f[12];
+    int32_t ang_table_b[12];
+    float_t k, b, r2;
+    int16_t pole_pairs;
+    uint32_t offset;
+
+    EACAL_DEBUG("electrical angle calibration start ...");
+    motor->enable_pwm(motor, true);
 
     force_drive(motor, 0, ELECTRICAL_ANGLE_CALIBRATION_POWER);
-    clock_cpu_delay_ms(ELECTRICAL_ANGLE_CALIBRATION_DELAY * 2);
-
+    CPU_Delay(ELECTRICAL_ANGLE_CALIBRATION_DELAY * 2);
 
     for (int i = 0; i < 12; i++)
     {
         force_drive(motor, F_PI * i / 6, ELECTRICAL_ANGLE_CALIBRATION_POWER);
-        clock_cpu_delay_ms(ELECTRICAL_ANGLE_CALIBRATION_DELAY);
-        ang_table[i] = encoder_get_rawAngle();
-        EACAL_DEBUG("1 %2d 0x%04x", i, ang_table[i]);
-    }
-
-    force_drive(motor, 0, ELECTRICAL_ANGLE_CALIBRATION_POWER);
-    clock_cpu_delay_ms(ELECTRICAL_ANGLE_CALIBRATION_DELAY);
-
-    for (int i = 11; i >= 0; i--)
-    {
-        force_drive(motor, F_PI * i / 6, ELECTRICAL_ANGLE_CALIBRATION_POWER);
-        clock_cpu_delay_ms(ELECTRICAL_ANGLE_CALIBRATION_DELAY);
-        ang_table[i] = (ang_table[i] + encoder_get_rawAngle()) / 2;
-        EACAL_DEBUG("2 %2d 0x%04x 0x%04x", i, encoder_get_rawAngle(), ang_table[i]);
+        CPU_Delay(ELECTRICAL_ANGLE_CALIBRATION_DELAY);
+        ang_table_f[i] = get_ang(motor);
+        if (ang_table_f[i] == ENCODER_INVALID)
+            goto _error;
     }
 
     /* 处理溢出 */
     for (int i = 0; i < 11; i++)
     {
-        int diff = ang_table[i] - ang_table[i + 1];
-        if (diff > INT16_MAX)
-            ang_table[i + 1] += 65536;
-        else if (diff < INT16_MIN)
-            ang_table[i + 1] -= 65536;
+        int32_t diff = ang_table_f[i] - ang_table_f[i + 1];
+        if (diff > ENCODER_MAX / 2)
+            ang_table_f[i + 1] += ENCODER_MAX;
+        else if (diff < -ENCODER_MAX / 2)
+            ang_table_f[i + 1] -= ENCODER_MAX;
+    }
+    for (int i = 0; i < 12; i++)
+    {
+        EACAL_DEBUG("1 %2d %d", i, ang_table_f[i]);
     }
 
-    pwm_disable_all_output();
+    force_drive(motor, 0, ELECTRICAL_ANGLE_CALIBRATION_POWER);
+    CPU_Delay(ELECTRICAL_ANGLE_CALIBRATION_DELAY);
+
+    for (int i = 11; i >= 0; i--)
+    {
+        force_drive(motor, F_PI * i / 6, ELECTRICAL_ANGLE_CALIBRATION_POWER);
+        CPU_Delay(ELECTRICAL_ANGLE_CALIBRATION_DELAY);
+        ang_table_b[i] = get_ang(motor);
+        if (ang_table_b[i] == ENCODER_INVALID)
+            goto _error;
+    }
+
+    /* 处理溢出 */
+    for (int i = 0; i < 11; i++)
+    {
+        int32_t diff = ang_table_b[i] - ang_table_b[i + 1];
+        if (diff > ENCODER_MAX / 2)
+            ang_table_b[i + 1] += ENCODER_MAX;
+        else if (diff < -ENCODER_MAX / 2)
+            ang_table_b[i + 1] -= ENCODER_MAX;
+    }
+
+    for (int i = 0; i < 12; i++)
+    {
+        ang_table_f[i] = (ang_table_f[i] + ang_table_b[i]) / 2;
+        EACAL_DEBUG("1 %2d %d %d", i, ang_table_b[i], ang_table_f[i]);
+    }
+
+    motor->enable_pwm(motor, false);
 
     /* 线性回归 */
-    float a, b;
-    float q = LeastSquareLinearFit(ang_table, 12, &a, &b);
-    EACAL_DEBUG("LeastSquareLinearFit: y = %d%+dx, Q=%d", (int)a, (int)b, (int)q);
 
-    if (q > 40)
+    r2 = LeastSquareLinearFit(ang_table_f, 12, &k, &b);
+    EACAL_DEBUG("LeastSquareLinearFit: y=%dx%+d, r2=%de-3", (int)k, (int)b, (int)(r2 * 1000));
+
+    if (r2 < 0.95f)
     {
-        EACAL_DEBUG("calibration error: the error is too large, Q=%d", (int)q);
+        EACAL_DEBUG("calibration error: The correlation is insufficient, r2=%de-3", (int)(r2 * 1000));
         return -1;
     }
-
-    int16_t pole_pairs = 1 / (fabsf(b) * 2 * F_PI / 65536.0f) + 0.5f;
-    uint16_t offset = a + 0.5f;
-    if (b < 0)
+    pole_pairs = lroundf(1.0f / (fabsf(k) * 2 * F_PI / ENCODER_MAX));
+    offset = lroundf(b);
+    if (k < 0)
     {
-        offset += 65536.0f / 2 / pole_pairs;
+        // offset += ENCODER_MAX / 2 / pole_pairs;
         pole_pairs = -pole_pairs;
     }
-    EACAL_DEBUG("calibration success: direction = %d, offset = %d, pole_pairs = %d", b > 0, offset,
-                      pole_pairs);
+    EACAL_DEBUG("calibration success: direction = %u, offset = %d, pole_pairs = %d", k > 0, offset, pole_pairs);
 
     motor->encoder.pole_pairs = pole_pairs;
     motor->encoder.ang_offset = offset;
 
     return 0;
+
+_error:
+    motor->enable_pwm(motor, false);
+    EACAL_DEBUG("other error");
+    return -1;
 }
