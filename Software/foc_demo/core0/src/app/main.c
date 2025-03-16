@@ -36,11 +36,10 @@ static uint16_t motor0_get_raw_angle(MotorClass_t *motor);
 static void motor0_set_pwm(MotorClass_t *motor, const foc_pwm_t *pwm);
 static void motor0_enable_pwm(MotorClass_t *motor, bool en);
 
-volatile core_comm_ctl_t *core_comm_ctl;
-MotorClass_t motor0;
+ATTR_PLACE_AT_FAST_RAM_BSS MotorClass_t motor0;
+ATTR_PLACE_AT_FAST_RAM_BSS volatile int vofa_write_ptr;
 
-volatile int vofa_write_ptr;
-DMA_ATTR just_float_data vofa_data[BUF_NUM] ATTR_ALIGN(64);
+volatile ATTR_SHARE_MEM core_comm_ctl_t core_comm_ctl;
 
 #if SPEED_FILTER_MODE == SPEED_FILTER_IIR
 /**
@@ -61,25 +60,16 @@ const float FLITER_DEN[][3] = {{1, 0, 0}, {1, -1.996026397, 0.9960891008},
 
 static void adc_callback(ADC16_Type *adc, uint32_t flag);
 
-#pragma GCC push_options
-#pragma GCC optimize("O0")
-static void wait_core_comm(void)
-{
-    while (core_comm_ctl == NULL)
-        ;
-}
-#pragma GCC pop_options
-
 int main(void)
 {
     board_init();
-
+    memset(&core_comm_ctl, 0, sizeof(core_comm_ctl));
     for (int i = 0; i < BUF_NUM; i++)
     {
-        vofa_data[i].tail[0] = 0x00;
-        vofa_data[i].tail[1] = 0x00;
-        vofa_data[i].tail[2] = 0x80;
-        vofa_data[i].tail[3] = 0x7f;
+        core_comm_ctl.vofa_buf[i].tail[0] = 0x00;
+        core_comm_ctl.vofa_buf[i].tail[1] = 0x00;
+        core_comm_ctl.vofa_buf[i].tail[2] = 0x80;
+        core_comm_ctl.vofa_buf[i].tail[3] = 0x7f;
     }
 
     mbx_init(HPM_MBX0A);
@@ -88,8 +78,6 @@ int main(void)
 
     /* 启动CPU1并等待返回启动信息 */
     multicore_release_cpu(HPM_CORE1, SEC_CORE_IMG_START);
-    wait_core_comm();
-    MAIN_DEBUG("recv vofa_buf addr %p", core_comm_ctl);
 
     drv832x_init_pins();
     drv832x_init_spi();
@@ -199,13 +187,13 @@ int main(void)
     mt6701_spi_init();
 #endif
 
-    motor0.encoder.ang_offset = 0x81b6;
-    motor0.encoder.pole_pairs = -7;
-    // if (electrical_angle_calibration(&motor0) == 0)
-    {
-        // motor0.qd_current_exp.iq = 3;
-        // motor0.qd_voltage_exp.iq = 0.3;
-        Motor_SetMode(&motor0, CURRENT_MODE);
+    // motor0.encoder.ang_offset = 0x81b6;
+    // motor0.encoder.pole_pairs = -7;
+    if (electrical_angle_calibration(&motor0) == 0)
+    { 
+        motor0.qd_current_exp.iq = 0;
+        motor0.qd_voltage_exp.iq = 0.2;
+        Motor_SetMode(&motor0, SVPWM_OPEN_LOOP_MODE);
         adc_enable_irq(2);
         adc_enable_it();
         adc_set_callback(adc_callback);
@@ -215,10 +203,8 @@ int main(void)
     {
         if (motor0.mode == SVPWM_OPEN_LOOP_MODE)
         {
-            motor0.angle_exp += 300;
-            if (motor0.angle_exp >= 65536.0f)
-                motor0.angle_exp = 0;
-            clock_cpu_delay_us(150);
+            motor0.angle_exp += 100;
+            clock_cpu_delay_us(200);
         }
     }
     return 0;
@@ -229,7 +215,7 @@ static void adc_callback(ADC16_Type *adc, uint32_t flag)
 {
     Motor_RunFoc(&motor0);
 
-    just_float_data *pdata = &vofa_data[vofa_write_ptr];
+    just_float_data *pdata = &core_comm_ctl.vofa_buf[vofa_write_ptr];
     pdata->data[0] = motor0.qd_current.iq;
     pdata->data[1] = motor0.qd_current_exp.iq;
     pdata->data[2] = motor0.qd_current.id;
@@ -272,19 +258,15 @@ void isr_mbx(void)
         return;
 
     mbx_retrieve_message(HPM_MBX0A, &msg);
-    if (core_comm_ctl == NULL)
-    {
-        core_comm_ctl = (core_comm_ctl_t *)sys_address_to_core_local_mem(HPM_CORE0, msg);
-    }
 
     if (msg == CORE1_CONTROL_MSG)
     {
 #define CONV_DATA(NAME, DST)                                                                                           \
     case offsetof(SetData_t, NAME):                                                                                    \
-        (DST) = core_comm_ctl->set_data.NAME;                                                                          \
+        (DST) = core_comm_ctl.set_data.NAME;                                                                          \
         break;
-        DCache_invalidate((void *)&core_comm_ctl->set_data, sizeof(SetData_t));
-        switch (core_comm_ctl->set_data.set_offset)
+
+        switch (core_comm_ctl.set_data.set_offset)
         {
             CONV_DATA(exp_iq, motor0.qd_current_exp.iq);
             CONV_DATA(exp_id, motor0.qd_current_exp.id);
@@ -306,13 +288,6 @@ void isr_mbx(void)
         }
         return;
     }
-
-    core_comm_ctl->vofa_buf1 = (just_float_data *)core_local_mem_to_sys_address(HPM_CORE0, (uint32_t)vofa_data);
-    core_comm_ctl->vofa_buf2 =
-        (just_float_data *)core_local_mem_to_sys_address(HPM_CORE0, (uint32_t)&vofa_data[BUF_NUM / 2]);
-    DCache_flush((void *)core_comm_ctl, sizeof(core_comm_ctl_t));
-    mbx_send_message(HPM_MBX0A, CORE0_UPDATAE_CTL);
-    MAIN_DEBUG("set core_comm_ctl %p %p", core_comm_ctl->vofa_buf1, core_comm_ctl->vofa_buf2);
 }
 
 static void motor0_get_uvw_current(MotorClass_t *motor, foc_uvw_current_t *uvw_current)

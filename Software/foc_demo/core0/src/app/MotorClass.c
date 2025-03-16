@@ -32,7 +32,7 @@ ATTR_RAMFUNC void Motor_RunFoc(MotorClass_t *motor)
     if (motor->mode == SVPWM_OPEN_LOOP_MODE)
     {
         /* svpwm开环模式使用angle_exp作为角度输入 */
-        foc_sin_cos(motor->angle_exp * (2.0f * F_PI / ENCODER_MAX), &sin_cos);
+        foc_sin_cos(motor->angle_exp * (2.0f * F_PI / UINT16_MAX), &sin_cos);
     }
     else
     {

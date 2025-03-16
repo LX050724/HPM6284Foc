@@ -33,7 +33,6 @@ static inline void DCache_invalidate(void *addr, size_t size)
 typedef enum {
     INVALID_MSG = -1,
     CORE1_CONTROL_MSG,
-    CORE0_UPDATAE_CTL,
     CORE0_VOFA_UPLOAD_BUF1,
     CORE0_VOFA_UPLOAD_BUF2,
 } MsgID;
@@ -64,8 +63,7 @@ typedef struct{
 } SetData_t;
 
 typedef struct {
-    just_float_data *vofa_buf1;
-    just_float_data *vofa_buf2;
+    just_float_data vofa_buf[BUF_NUM];
     SetData_t set_data;
 } core_comm_ctl_t;
 

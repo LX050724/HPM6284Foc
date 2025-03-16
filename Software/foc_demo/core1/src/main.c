@@ -28,7 +28,6 @@ volatile ATTR_SHARE_MEM core_comm_ctl_t core_comm_ctl;
 int main(void)
 {
     clock_update_core_clock();
-    l1c_dc_disable();
 
     HPM_IOC->PAD[IOC_PAD_PB11].FUNC_CTL = IOC_PB11_FUNC_CTL_GPIO_B_11;
 
@@ -75,9 +74,6 @@ void isr_mbx(void)
     case CORE0_VOFA_UPLOAD_BUF1:
     case CORE0_VOFA_UPLOAD_BUF2:
         vofa_push_send(msg_id);
-        break;
-    case CORE0_UPDATAE_CTL:
-        DCache_invalidate((void *)&core_comm_ctl, sizeof(core_comm_ctl));
         break;
     default:
         break;
@@ -129,7 +125,6 @@ void usbd_read_callback(char *data, uint32_t len)
                     *(cmd_list[index].tar_val) = value;
                     core_comm_ctl.set_data.set_offset =
                         (uint32_t)(cmd_list[index].tar_val) - (uint32_t)&core_comm_ctl.set_data;
-                    DCache_flush((void *)&core_comm_ctl.set_data, sizeof(SetData_t));
                     mbx_send_message(HPM_MBX0B, CORE1_CONTROL_MSG);
                     break;
                 }
@@ -148,7 +143,7 @@ void vofa_push_send(MsgID buf_index)
         if (!ep_tx_busy_flag)
         {
             ep_tx_busy_flag = true;
-            usbd_ep_start_write(0, 0x81, (uint8_t *)core_comm_ctl.vofa_buf1, sizeof(just_float_data) * BUF_NUM / 2);
+            usbd_ep_start_write(0, 0x81, (uint8_t *)&core_comm_ctl.vofa_buf, sizeof(just_float_data) * BUF_NUM / 2);
         }
     }
     else if (buf_index == CORE0_VOFA_UPLOAD_BUF2)
@@ -156,7 +151,7 @@ void vofa_push_send(MsgID buf_index)
         if (!ep_tx_busy_flag)
         {
             ep_tx_busy_flag = true;
-            usbd_ep_start_write(0, 0x81, (uint8_t *)core_comm_ctl.vofa_buf2, sizeof(just_float_data) * BUF_NUM / 2);
+            usbd_ep_start_write(0, 0x81, (uint8_t *)&core_comm_ctl.vofa_buf, sizeof(just_float_data) * BUF_NUM / 2);
         }
     }
 }
