@@ -23,7 +23,7 @@ extern "C" {
 #define ENCODER_LINEAR_HALL (ENCODER_INTERFACE_LINEAR_HALL << 8 | 4)
 
 #define ENCODER_TYPE ENCODER_MT6701 // 编码器类型
-#define ENCODER_MAX 0xffffff        // 编码器最大值
+#define ENCODER_MAX 0xffff        // 编码器最大值
 #define ENCODER_INVALID ((uint32_t) - 1)
 
 /* 时间参数 */

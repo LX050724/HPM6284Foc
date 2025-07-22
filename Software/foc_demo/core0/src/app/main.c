@@ -191,9 +191,9 @@ int main(void)
     // motor0.encoder.pole_pairs = -7;
     if (electrical_angle_calibration(&motor0) == 0)
     { 
-        motor0.qd_current_exp.iq = 0;
-        motor0.qd_voltage_exp.iq = 0.2;
-        Motor_SetMode(&motor0, SVPWM_OPEN_LOOP_MODE);
+        motor0.qd_current_exp.iq = 5;
+        motor0.qd_voltage_exp.iq = 0.8;
+        Motor_SetMode(&motor0, CURRENT_MODE);
         adc_enable_irq(2);
         adc_enable_it();
         adc_set_callback(adc_callback);

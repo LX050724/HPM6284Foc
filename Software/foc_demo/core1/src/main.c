@@ -151,7 +151,7 @@ void vofa_push_send(MsgID buf_index)
         if (!ep_tx_busy_flag)
         {
             ep_tx_busy_flag = true;
-            usbd_ep_start_write(0, 0x81, (uint8_t *)&core_comm_ctl.vofa_buf, sizeof(just_float_data) * BUF_NUM / 2);
+            usbd_ep_start_write(0, 0x81, (uint8_t *)&core_comm_ctl.vofa_buf[BUF_NUM / 2], sizeof(just_float_data) * BUF_NUM / 2);
         }
     }
 }
